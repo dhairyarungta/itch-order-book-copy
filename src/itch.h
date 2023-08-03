@@ -168,6 +168,129 @@ static uint16_t read_locate(char const *src)
 
 using add_order_t = itch_message<MSG::ADD_ORDER>;
 
-struct itch_message_
+struct itch_message<MSG::ADD_ORDER>
+{
+    itch_message(timestamp_t __timestamp, oid_t __oid, price_t __price, qty_t __qty, uint16_t __stock_locate,BUY_SELL __buy)
+        :timestamp(__timestamp), oid(__oid), price(__price), qty(__qty),stock_locate(__stock_locate), buy(__buy)
+    {}
+
+    timestamp_t const timestamp;
+    oid_t const oid;
+    price_t const price ;
+    qty_t const qty;
+    uint16_t const stock_locate ;
+    BUY_SELL const buy;
+    static itch_message parse (char const *ptr)
+    {
+        return add_order_t (read_timestamp (ptr+5), read_oid (ptr+11), read_price (ptr+32),
+            read_qty (ptr+20), read_locate (ptr+1), BUY_SELL(*(ptr+19)));
+    }
+};
+
+using add_order_mpid_t = itch_message<MSG::ADD_ORDER_MPID>;
+template <>
+struct itch_message<MSG::ADD_ORDER_MPID>
+{
+    itch_message(add_order_t const __base)
+        :add_msg(__base)
+    {}
+    add_order_t const add_msg;
+    static itch_message parse(char const*ptr)
+    {
+        return itch_message(add_order_t::parse(ptr));
+    }
+};
+
+using execute_order_t = itch_message<MSG::EXECUTE_ORDER>;
+template<>
+struct itch_message<MSG::EXECUTE_ORDER>
+{
+    itch_message(oid_t __oid, timestamp_t __t, qty_t __q, uint16_t __s)
+        :oid(__oid), timestamp(__t), qty(__q), stock_locate(__s)
+    {}
+
+    oid_t const oid;
+    timestamp_t const timestamp;
+    qty_t const qty;
+    uint16_t const stock_locate;
+    static itch_message parse(char const*ptr)
+    {
+        return itch_message(read_oid(ptr+11), read_timestamp(ptr+5), read_qty(ptr+19), read_locate(ptr+1));
+        
+    }
+
+};
+
+using execute_with_price_t = itch_message<MSG::EXECUTE_ORDER_WITH_PRICE>
+template<>
+struct itch_message<MSG::EXECUTE_ORDER_WITH_PRICE>
+{
+    itch_message(execute_order_t const __base)
+        :exec(__base) 
+    {}
+
+    execute_order_t const exec;
+    static itch_message parse (char const*ptr)
+    {
+        return itch_message(execute_order_t::parse(ptr));
+    }
+};
+
+using order_reduce_t = itch_message<MSG::REDUCE_ORDER>;
+template<>
+struct itch_message<MSG::REDUCE_ORDER>
+{
+    itch_message(oid_t __o,timestamp_t __t, qty_t __q)
+        :oid(__o), timestamp(__t), qty(__q)
+    {}
+
+    oid_t const oid;
+    timestamp_t const timestamp;
+    qty_t const qty;
+    static itch_message parse(char const*ptr)
+    {
+        return itch_message(read_oid(ptr+11), read_timestamp(ptr+5), read_qty(ptr+19));
+    }
+};
+
+using order_delete_t = itch_message<MSG::DELETE_ORDER>;
+template<>
+struct itch_message<MSG::DELETE_ORDER>
+{
+    itch_message(oid_t __o, timestamp_t __t): oid(__o),timestamp(__t)
+    {}
+    oid_t const oid;
+    timestamp_t const timestamp;
+
+    static itch_message parse(char const* ptr)
+    {
+        return itch_message(read_oid(ptr+11), read_timestamp(ptr+5));
+    }
+};
+
+
+
+using order_replace_t = itch_message<MSG::REPLACE_ORDER>;
+template<>
+struct itch_message<MSG::REPLACE_ORDER>
+{
+    itch_message(oid_t __old_oid,oid_t __new_oid , qty_t __q, price_t __p) 
+        :oid(__old_oid), new_order_id(__new_oid), new_qty(__q), new_price(__p)
+    {}
+    oid_t const oid;
+    oid_t const new_order_id;
+    qty_t const new_qty;
+    price_t const new_price;
+
+    static itch_message parse(char const* ptr)
+    {
+        return itch_message(read_oid(ptr+11), read_oid(ptr+19), read_qty(ptr+27),read_price(ptr+31));
+    }
+    
+};
+
+
+
+
 
 #endif 
