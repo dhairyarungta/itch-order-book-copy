@@ -3,6 +3,8 @@
 
 
 #include <sys/types.h>
+#include <cstring>
+
 
 enum class itch_t
 {
@@ -97,6 +99,75 @@ template<>
 constexpr unsigned char netlen<MSG::PROCESS_LULD_AUCTION_COLLAR_MESSAGE> =35;
 
 
+template<itch_t __code>
+struct itch_message
+{   
+    static constexpr itch_t code = __code;
+    static constexpr unsigned char network_len = netlen<__code>;
+    static itch_message parse (char const*ptr)
+    {
+        static_cast<void>(ptr);
+        return itch_message();
+    }
 
+};
+
+enum class BUY_SELL : char {BUY = 'B' , SELL = 'S'};
+enum class timestamp_t :uint64_t{};
+enum class oid_t :uint64_t{};
+enum class price_t : uint32_t{};
+enum class qty_t : uint32_t{};
+
+static uint64_t read_eight(char const *src)
+{
+    return be64toh(*(uint64_t const*)src);
+}
+
+static uint64_t read_six(char const *src)
+{
+    uint64_t ret;
+    char *pun = (char*)&ret;
+    memcpy(pun ,src, 6);
+    return (be64toh(ret)>>16);
+}
+
+static uint32_t read_four(char const *src)
+{
+    return be32toh(*(uint32_t const *)src);
+}
+
+static uint16_t read_two (char const *src)
+{
+    return be16toh(*(uint16_t const *)src);
+}
+
+static timestamp_t read_timestamp (char const *src)
+{
+    return timestamp_t(read_six(src));
+}
+
+static oid_t read_oid (char const *src)
+{
+    return oid_t(read_eight(src));
+}
+
+static price_t read_price(char const *src)
+{
+    return price_t(read_four(src));
+}
+
+static qty_t read_qty(char const *src)
+{
+    return qty_t(read_four(src));
+}
+
+static uint16_t read_locate(char const *src)
+{
+    return read_two(src);
+}
+
+using add_order_t = itch_message<MSG::ADD_ORDER>;
+
+struct itch_message_
 
 #endif 
