@@ -167,7 +167,7 @@ static uint16_t read_locate(char const *src)
 }
 
 using add_order_t = itch_message<MSG::ADD_ORDER>;
-
+template<>
 struct itch_message<MSG::ADD_ORDER>
 {
     itch_message(timestamp_t __timestamp, oid_t __oid, price_t __price, qty_t __qty, uint16_t __stock_locate,BUY_SELL __buy)
@@ -216,12 +216,11 @@ struct itch_message<MSG::EXECUTE_ORDER>
     static itch_message parse(char const*ptr)
     {
         return itch_message(read_oid(ptr+11), read_timestamp(ptr+5), read_qty(ptr+19), read_locate(ptr+1));
-        
     }
 
 };
 
-using execute_with_price_t = itch_message<MSG::EXECUTE_ORDER_WITH_PRICE>
+using execute_with_price_t = itch_message<MSG::EXECUTE_ORDER_WITH_PRICE>;
 template<>
 struct itch_message<MSG::EXECUTE_ORDER_WITH_PRICE>
 {
