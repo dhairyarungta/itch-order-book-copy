@@ -3,7 +3,9 @@
 
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <cstring>
+
 
 
 enum class itch_t
@@ -168,7 +170,7 @@ static uint16_t read_locate(char const *src)
 
 using add_order_t = itch_message<MSG::ADD_ORDER>;
 template<>
-struct itch_message<MSG::ADD_ORDER>
+struct itch_message <MSG::ADD_ORDER>
 {
     itch_message(timestamp_t __timestamp, oid_t __oid, price_t __price, qty_t __qty, uint16_t __stock_locate,BUY_SELL __buy)
         :timestamp(__timestamp), oid(__oid), price(__price), qty(__qty),stock_locate(__stock_locate), buy(__buy)
